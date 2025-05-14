@@ -8,6 +8,12 @@ export interface Article {
   content: string;
   cover: { url: string };
   publishedAt: Date;
+  author: {
+    id: string;
+    name: string;
+    email: string;
+    avatar?: { url: string }; // Optional avatar field
+  };
 }
 
 const STRAPI_URL = "http://localhost:1337";
@@ -18,13 +24,17 @@ export default function AppComponent() {
   // Fetch articles from Strapi
   const getArticles = async () => {
     try {
-      const response = await fetch(`${STRAPI_URL}/api/articles?populate=*`);
+      // const response = await fetch(`${STRAPI_URL}/api/articles?populate=*`);
+      const response = await fetch(
+        `${STRAPI_URL}/api/articles?populate[author][populate]=avatar&populate=cover`
+      );
+
       if (!response.ok) {
         console.error("Failed to fetch articles:", response.statusText);
         return;
       }
       const data = await response.json();
-      console.log("Fetched Articles:", data.data); // 👈 Check if documentId is included
+      console.log("Fetched Articles:", data.data); // Check the structure of the response
       setArticles(data.data);
     } catch (error) {
       console.error("Error fetching articles:", error);
@@ -72,6 +82,23 @@ export default function AppComponent() {
                     <p className="text-sm text-gray-500">
                       Published: {formatDate(article.publishedAt)}
                     </p>
+                    <div className="flex items-center mt-4">
+                      <div className="w-10 h-10 mr-2 rounded-full overflow-hidden">
+                        {/* Check if author has avatar and render the image */}
+                        <img
+                          className="w-full h-full object-cover"
+                          src={
+                            article.author.avatar
+                              ? STRAPI_URL + article.author.avatar.url
+                              : "/uploads/default_avatar.png" // Fallback if avatar is not available
+                          }
+                          alt={article.author.name}
+                        />
+                      </div>
+                      <p className="text-sm text-gray-700">
+                        {article.author.name}
+                      </p>
+                    </div>
                   </div>
                 </Link>
               </article>
