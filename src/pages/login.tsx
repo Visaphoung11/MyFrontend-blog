@@ -1,8 +1,12 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const Login: React.FC = () => {
-  const navigate = useNavigate(); // ✅ Navigation hook
+interface LoginProps {
+  onLogin: (userData: any) => void;
+}
+
+const Login: React.FC<LoginProps> = ({ onLogin }) => {
+  const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
   const [username, setUsername] = useState("");
@@ -31,8 +35,7 @@ const Login: React.FC = () => {
       if (response.ok) {
         localStorage.setItem("token", data.jwt);
         localStorage.setItem("user", JSON.stringify(data.user));
-
-        // ✅ Redirect to homepage
+        onLogin(data.user); // Pass user data back to App for state update
         navigate("/");
       } else {
         setErrorMsg(data.error?.message || "Login failed. Please try again.");
@@ -69,6 +72,7 @@ const Login: React.FC = () => {
               className="w-full p-3 rounded-full bg-white text-gray-700 shadow-md focus:outline-none"
             />
             <button
+              type="button"
               className="absolute inset-y-0 right-3 flex items-center text-gray-700"
               onClick={() => setShowPassword(!showPassword)}
             >
@@ -79,7 +83,7 @@ const Login: React.FC = () => {
           {errorMsg && <p className="text-red-600 mb-2">{errorMsg}</p>}
 
           <button
-            className="w-full bg-pink-500 text-white py-3 rounded-full text-lg font-semibold shadow-md"
+            className="w-full bg-teal-600 text-white py-3 rounded-full text-lg font-semibold shadow-md"
             onClick={handleLogin}
             disabled={loading}
           >
